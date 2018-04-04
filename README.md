@@ -1,1 +1,1 @@
-# Lyric-Generator-CS671-
+# Lyric-Generator-CS671
