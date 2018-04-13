@@ -1,0 +1,7 @@
+Dataset:
+https://github.com/v-chuqin/simPoem
+https://www.kaggle.com/mousehead/songlyrics/data
+https://www.kaggle.com/gyani95/380000-lyrics-from-metrolyrics
+https://github.com/walkerkq/musiclyrics
+
+
