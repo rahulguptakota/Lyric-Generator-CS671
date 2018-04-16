@@ -1,8 +1,9 @@
 import keras
 from keras.models import Sequential
-from keras.layers import Activation,LSTM,Dense
+from keras.layers import Activation,LSTM,Dense,Embedding
 from keras.optimizers import Adam
-import pickle
+from scipy.sparse import csr_matrix
+import pickle, random
 
 import re, json
 import csv
@@ -48,6 +49,7 @@ word_ix={c:i for i,c in enumerate(vocab)}
 ix_word={i:c for i,c in enumerate(vocab)}
 
 maxlen=5
+batch_size = 128
 vocab_size=len(vocab)
 
 sentences=[]
@@ -58,21 +60,43 @@ for i in range(len(words_seq)-maxlen-1):
 
 print(len(sentences),maxlen,vocab_size)
 
-X=np.zeros((len(sentences),maxlen,vocab_size))
-y=np.zeros((len(sentences),vocab_size))
-for ix in range(len(sentences)):
-    y[ix,word_ix[next_word[ix]]]=1
-    for iy in range(maxlen):
-        X[ix,iy,word_ix[sentences[ix][iy]]]=1
+# def get_Xy(batch_size, i):
+#     global word_ix, sentences, vocab_size, maxlen, next_word
+#     X=np.zeros((batch_size,maxlen))
+#     y=np.zeros((batch_size,vocab_size), dtype=np.bool)
+#     for ix in range(i*batch_size, (i+1)*batch_size):
+#         y[ix,word_ix[next_word[ix]]]=1
+#         for iy in range(maxlen):
+#             X[ix,iy]=word_ix[sentences[ix][iy]]
+#     return X,y
 
+def generator(batch_size):
+    global word_ix, sentences, vocab_size, maxlen, next_word
+    # Create empty arrays to contain batch of features and labels#
+    batch_features = np.zeros((batch_size, maxlen))
+    batch_labels = np.zeros((batch_size,vocab_size), dtype=np.bool)
+    while True:
+        for ix in range(batch_size):
+            # choose random index in features
+            index = random.choice(range(len(sentences)))
+            batch_labels[ix,word_ix[next_word[index]]] = 1
+            for iy in range(maxlen):
+                batch_features[ix,iy]=word_ix[sentences[index][iy]]
+        yield batch_features, batch_labels
+
+max_features = vocab_size
 model=Sequential()
-model.add(LSTM(128,input_shape=(maxlen,vocab_size)))
+model.add(Embedding(max_features, input_length=maxlen ,output_dim=256))
+model.add(LSTM(128))
 model.add(Dense(vocab_size))
 model.add(Activation('softmax'))
 model.summary()
 model.compile(optimizer=Adam(lr=0.01),loss='categorical_crossentropy')
 
-model.fit(X,y,epochs=5,batch_size=128)
+model.fit_generator(generator(batch_size), samples_per_epoch=len(sentences)/batch_size, nb_epoch=10)
+
+# for i in range(1000):
+#     model.fit(X,y,epochs=5,batch_size=128)
 
 model_json = model.to_json()
 with open("model.json", "w") as json_file:
