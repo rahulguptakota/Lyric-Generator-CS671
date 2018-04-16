@@ -1,14 +1,16 @@
-__author__ = 'Tony Beltramelli www.tonybeltramelli.com - 19/08/2016'
+# __author__ = 'Tony Beltramelli www.tonybeltramelli.com - 19/08/2016'
 
 import numpy as np
 import codecs
+from gensim.test.utils import datapath, get_tmpfile
+from gensim.models import KeyedVectors
 
 class Vocabulary:
     vocabulary = {}
     binary_vocabulary = {}
     char_lookup = {}
     size = 0
-    # separator = '->'
+    separator = '->'
 
     def generate(self, input_file_path):
         input_file = codecs.open(input_file_path, 'r', 'utf_8')
@@ -24,25 +26,27 @@ class Vocabulary:
         self.create_binary_representation()
 
     def retrieve(self, input_file_path):
-        input_file = codecs.open(input_file_path, 'r', 'utf_8')
-        buffer = ""
-        for line in input_file:
-            try:
-                separator_position = len(buffer) + line.index(self.separator)
-                buffer += line
-                key = buffer[:separator_position]
-                value = buffer[separator_position + len(self.separator):]
-                value = np.fromstring(value, sep=',')
+        # input_file = codecs.open(input_file_path, 'r', 'utf_8')
+        # buffer = ""
+        # for line in input_file:
+        #     try:
+        #         separator_position = len(buffer) + line.index(self.separator)
+        #         buffer += line
+        #         key = buffer[:separator_position]
+        #         value = buffer[separator_position + len(self.separator):]
+        #         value = np.fromstring(value, sep=',')
 
-                self.binary_vocabulary[key] = value
-                self.vocabulary[key] = np.where(value == 1)[0][0]
-                self.char_lookup[np.where(value == 1)[0][0]] = key
+        #         self.binary_vocabulary[key] = value
+        #         self.vocabulary[key] = np.where(value == 1)[0][0]
+        #         self.char_lookup[np.where(value == 1)[0][0]] = key
 
-                buffer = ""
-            except ValueError:
-                buffer += line
-        input_file.close()
-        self.set_vocabulary_size()
+        #         buffer = ""
+        #     except ValueError:
+        #         buffer += line
+        # input_file.close()
+        # self.set_vocabulary_size()
+        model = KeyedVectors.load_word2vec_format("../glove.6B.50d.word2vec")
+
 
     def create_binary_representation(self):
         for key, value in self.vocabulary.items():

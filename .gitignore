@@ -1,3 +1,7 @@
+.idea/
+songdata.csv
+Char_Model/modules/glove.6B.50d.word2vec
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
