@@ -11,7 +11,6 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 from nltk import word_tokenize
 from scipy.sparse import csr_matrix
-from keras.layers import Dropout
 
 df = []
 with open('songdata.csv', 'r') as csvfile:
@@ -27,7 +26,7 @@ data=np.array(df)
 print("Length of data: ", len(data))
 
 corpus=''
-for ix in range(1500):
+for ix in range(15):
     corpus+=" "
     corpus+=data[ix]
     # print(ix)
@@ -42,23 +41,19 @@ fp.close()
 # corpus=corpus[]
 corpus = re.sub(r"\([^\n]*\)", " ", corpus)
 corpus = re.sub(r"\([^\n]*\)", " ", corpus)
-corpus = re.sub(r"\n+", " ttttttttttt ", corpus)
-corpus=corpus.lower()
+corpus = re.sub(r"\n+", " ", corpus)
+
 print("corpus constructed")
 # print(corpus)
 # exit()
 words_seq = word_tokenize(corpus)
-prev_word = ''
-new_seq = []
-for i in range(len(words_seq)):
-    if words_seq[i]=="ttttttttttt":
-        new_seq.append("\n")
-    elif words_seq[i] != prev_word
-        new_seq.append(words_seq[i])
-        prev_word = words_seq[i]
+words_seq = [token.lower() for token in words_seq]
+# for i in range(len(words_seq)):
+#     if words_seq[i]=="ttttttttttt":
+#         words_seq[i] = ""
 
 print("length of words_seq: ", len(words_seq))
-words_seq = new_seq[:300000]
+words_seq = words_seq[:200000]
 print(words_seq)
 
 vocab=list(set(words_seq))
@@ -71,7 +66,7 @@ print(len(vocab))
 word_ix={c:i for i,c in enumerate(vocab)}
 ix_word={i:c for i,c in enumerate(vocab)}
 # print(ix_word)
-maxlen=10
+maxlen=5
 batch_size = 128
 vocab_size=len(vocab)
 
@@ -93,34 +88,77 @@ print(len(sentences),maxlen,vocab_size)
 #             X[ix,iy]=word_ix[sentences[ix][iy]]
 #     return X,y
 
+
+def loadGloveModel(gloveFile):
+    print("Loading Glove Model")
+    f = open(gloveFile,'r')
+    Glove_model = {}
+    for line in f:
+        splitLine = line.split()
+        word = splitLine[0]
+        embedding = np.array([float(val) for val in splitLine[1:]])
+        Glove_model[word] = embedding
+    print("Done.",len(Glove_model)," words loaded!")
+    return Glove_model
+
+glove_model = loadGloveModel("glove.6B.50d.txt")
+
+# glove_model[word]
+
 def generator(batch_size):
     global word_ix, sentences, vocab_size, maxlen, next_word
     # Create empty arrays to contain batch of features and labels#
-    batch_features = np.zeros((batch_size, maxlen))
-    batch_labels = np.zeros((batch_size,vocab_size), dtype=np.bool)
+    batch_features = np.zeros((batch_size, maxlen*50))
+    batch_labels = np.zeros((batch_size, 50))
+
+    # batch_labels = np.zeros((batch_size,vocab_size), dtype=np.bool)
     while True:
         for ix in range(batch_size):
             # choose random index in features
-            index = random.choice(range(len(sentences)))
-            batch_labels[ix,word_ix[next_word[index]]] = 1
-            for iy in range(maxlen):
-                batch_features[ix,iy]=word_ix[sentences[index][iy]]
-        yield (batch_features/vocab_size, batch_labels)
+            try:
+                index = random.choice(range(len(sentences)))
+                batch_labels[ix] = glove_model[next_word[index]]
+                for iy in range(maxlen):
+                    print(iy)
+                    batch_features[ix][iy*50:(iy+1)*50] = list(glove_model[sentences[index][iy]])
+                # batch_labels[ix,word_ix[next_word[index]]] = 1
+                # for iy in range(maxlen):
+                # batch_features[ix,iy]=word_ix[sentences[index][iy]]
+            except:
+                ix -= 1
+        yield batch_features, batch_labels
 
-max_features = vocab_size
+max_features = maxlen*50
 model=Sequential()
-model.add(Embedding(max_features, input_length=maxlen ,output_dim=256))
-model.add(Dense(256))
-model.add(Activation('relu'))
-model.add(Dropout(0.5))
+model.add(Embedding(max_features, input_length=maxlen*50 ,output_dim=256))
 model.add(LSTM(128))
-model.add(Dropout(0.2))
-model.add(Dense(vocab_size))
+model.add(Dense(50))
 model.add(Activation('softmax'))
 model.summary()
-model.compile(optimizer=Adam(lr=0.01),loss='categorical_crossentropy',metrics=['accuracy','top_k_categorical_accuracy'])
 
-model.fit_generator(generator(batch_size), samples_per_epoch=len(sentences)/batch_size, nb_epoch=5)
+
+
+# def custom_pred(y_true, y_pred):
+#     # dot_prod = 0
+#     # for i in range(y_true.size()):
+#     #     dot_prod += y_true[i]*y_pred[i]
+#     import keras.backend as K
+#     C = K.sum(y_true * y_pred,axis=-1,keepdims=True)
+#     # val = K.cast_to_floatx(C)
+#     val = K.eval(C)
+#     # print(int(C))
+#     # print(C.size())
+#     # print(C.shape())
+#     print(val)
+#     if val > 0.4:
+#         return 1
+#     else:
+#         return 0
+
+
+model.compile(optimizer=Adam(lr=0.1),loss='categorical_crossentropy',metrics=['accuracy'])
+
+model.fit_generator(generator(batch_size), samples_per_epoch=len(sentences)/batch_size, nb_epoch=10)
 
 # for i in range(1000):
 #     model.fit(X,y,epochs=5,batch_size=128)

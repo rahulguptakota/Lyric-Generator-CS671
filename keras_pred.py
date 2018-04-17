@@ -91,7 +91,8 @@ for i in range(100):
     print(x_sample)
     for j in range(maxlen):
         x[0,j]=word_ix[x_sample[j].lower()]/vocab_size
-    probs=loaded_model.predict(x)    
+    probs=loaded_model.predict(x)
+    # print(i, probs)
     probs=np.reshape(probs,probs.shape[1])
     print(i, len(probs))
     # ix=list(probs).index(max(probs))
