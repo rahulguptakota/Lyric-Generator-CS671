@@ -13,35 +13,48 @@ from nltk import word_tokenize
 from scipy.sparse import csr_matrix
 
 df = []
-# with open('songdata.csv', 'r') as csvfile:
-# 	spamreader = csv.reader(csvfile, delimiter=',')
-# 	i = 0
-# 	for row in spamreader:
-# 		df.append(row[3])
-# 		i+=1
-# 		# print("-------------------------------------------------------")
-# 		# if i > 5:
-# 		# 	break
-# data=np.array(df)
-# print(len(data))
+with open('songdata.csv', 'r') as csvfile:
+	spamreader = csv.reader(csvfile, delimiter=',')
+	i = 0
+	for row in spamreader:
+		df.append(row[3])
+		i+=1
+		# print("-------------------------------------------------------")
+		# if i > 5:
+		# 	break
+data=np.array(df)
+print("Length of data: ", len(data))
 
 corpus=''
-# for ix in range(1000):
-#     corpus+=data[ix]
-#     # print(ix)
-# fp = open("corpus.p", "wb")
-# pickle.dump(corpus, fp)
-fp = open("corpus.p", "rb")
-corpus = pickle.load(fp)
+for ix in range(1500):
+    corpus+=" "
+    corpus+=data[ix]
+    # print(ix)
+
+# print(corpus)
+
+fp = open("corpus.p", "wb")
+pickle.dump(corpus, fp)
+# fp = open("corpus.p", "rb")
+# corpus = pickle.load(fp)
 fp.close()
 # corpus=corpus[]
-corpus = re.sub(r"\n+", " \n ", corpus)
+corpus = re.sub(r"\([^\n]*\)", " ", corpus)
+corpus = re.sub(r"\([^\n]*\)", " ", corpus)
+corpus = re.sub(r"\n+", " ttttttttttt ", corpus)
 
 print("corpus constructed")
 # print(corpus)
-words_seq = corpus.split(' ')
+# exit()
+words_seq = word_tokenize(corpus)
+for i in range(len(words_seq)):
+    if words_seq[i]=="ttttttttttt":
+        words_seq[i] = "\n"
+
 print("length of words_seq: ", len(words_seq))
-words_seq = words_seq[:300000]
+words_seq = words_seq[:200000]
+print(words_seq)
+
 vocab=list(set(words_seq))
 fp = open("vocab.p", "wb")
 pickle.dump(vocab, fp)
@@ -107,9 +120,4 @@ with open("model.json", "w") as json_file:
     json_file.write(model_json)
 # serialize weights to HDF5
 model.save_weights("model.h5")
-<<<<<<< HEAD
 print("Saved model to disk")
-=======
-print("Saved model to disk")
-
->>>>>>> bcbbc89432bfaa2f3b12810a03d5da56b6748057

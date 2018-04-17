@@ -20,12 +20,9 @@ loaded_model.load_weights("model.h5")
 # print("Loaded model from disk")
 
 # evaluate loaded model on test data
-<<<<<<< HEAD
 loaded_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy','top_k_categorical_accuracy'])
-=======
-loaded_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-
+####### loading/storing corpus
 corpus=''
 # for ix in range(len(data)):
 #     corpus+=data[ix]
@@ -34,6 +31,7 @@ corpus=''
 fp = open("corpus.p", "rb")
 corpus = pickle.load(fp)
 fp.close()
+
 # corpus=corpus[]
 corpus = re.sub(r"\n+", " \n ", corpus)
 
@@ -41,12 +39,15 @@ print("corpus constructed")
 # print(corpus)
 words_seq = corpus.split(' ')
 words_seq = words_seq[:150000]
-vocab=list(set(words_seq))
-fp = open("vocab.p", "wb")
-pickle.dump(vocab, fp)
-# fp = open("vocab.p", "rb")
-# vocab = pickle.load(fp)
+
+####### loading/storing vocab
+# vocab=list(set(words_seq))
+# fp = open("vocab.p", "wb")
+# pickle.dump(vocab, fp)
+fp = open("vocab.p", "rb")
+vocab = pickle.load(fp)
 fp.close()
+
 print(len(vocab))
 word_ix={c:i for i,c in enumerate(vocab)}
 ix_word={i:c for i,c in enumerate(vocab)}
@@ -84,4 +85,3 @@ for i in range(100):
     generated+=[ix_word[ix]]
 
 print(generated)
->>>>>>> bcbbc89432bfaa2f3b12810a03d5da56b6748057
