@@ -20,10 +20,9 @@ loaded_model.load_weights("model.h5")
 # print("Loaded model from disk")
 
 # evaluate loaded model on test data
-<<<<<<< HEAD
+
 loaded_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy','top_k_categorical_accuracy'])
-=======
-loaded_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
 
 
 corpus=''
