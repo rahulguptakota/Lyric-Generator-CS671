@@ -47,12 +47,17 @@ print("corpus constructed")
 # print(corpus)
 # exit()
 words_seq = word_tokenize(corpus)
+prev_word = ''
+new_seq = []
 for i in range(len(words_seq)):
     if words_seq[i]=="ttttttttttt":
-        words_seq[i] = "\n"
+        new_seq.append("\n")
+    elif words_seq[i] != prev_word
+        new_seq.append(words_seq[i])
+        prev_word = words_seq[i]
 
 print("length of words_seq: ", len(words_seq))
-words_seq = words_seq[:300000]
+words_seq = new_seq[:300000]
 print(words_seq)
 
 vocab=list(set(words_seq))
