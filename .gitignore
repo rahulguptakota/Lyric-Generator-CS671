@@ -1,3 +1,5 @@
+corpus.p
+vocab.p
 .idea/
 songdata.csv
 Char_Model/modules/glove.6B.50d.word2vec
