@@ -70,7 +70,7 @@ print(len(vocab))
 word_ix={c:i for i,c in enumerate(vocab)}
 ix_word={i:c for i,c in enumerate(vocab)}
 # print(ix_word)
-maxlen=5
+maxlen=10
 batch_size = 128
 vocab_size=len(vocab)
 
