@@ -9,6 +9,7 @@ import re, json
 import csv
 import numpy as np
 from nltk import word_tokenize
+from keras.models import model_from_json
 
 json_file = open('model.json', 'r')
 loaded_model_json = json_file.read()
@@ -19,4 +20,4 @@ loaded_model.load_weights("model.h5")
 # print("Loaded model from disk")
 
 # evaluate loaded model on test data
-loaded_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+loaded_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy','top_k_categorical_accuracy'])

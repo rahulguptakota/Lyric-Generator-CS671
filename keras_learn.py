@@ -1,32 +1,34 @@
-import keras
-from keras.models import Sequential
-from keras.layers import Activation,LSTM,Dense,Embedding
-from keras.optimizers import Adam
-from scipy.sparse import csr_matrix
-import pickle, random
-
-import re, json
 import csv
+import json
+import pickle
+import random
+import re
+
+import keras
 import numpy as np
+from keras.layers import LSTM, Activation, Dense, Embedding
+from keras.models import Sequential
+from keras.optimizers import Adam
 from nltk import word_tokenize
+from scipy.sparse import csr_matrix
 
 df = []
 # with open('songdata.csv', 'r') as csvfile:
 # 	spamreader = csv.reader(csvfile, delimiter=',')
 # 	i = 0
 # 	for row in spamreader:
-# 		df.append(row[3][:100])
+# 		df.append(row[3])
 # 		i+=1
 # 		# print("-------------------------------------------------------")
 # 		# if i > 5:
 # 		# 	break
-#
 # data=np.array(df)
-# print(data)
+# print(len(data))
 
 corpus=''
-# for ix in range(len(data)):
+# for ix in range(1000):
 #     corpus+=data[ix]
+#     # print(ix)
 # fp = open("corpus.p", "wb")
 # pickle.dump(corpus, fp)
 fp = open("corpus.p", "rb")
@@ -38,7 +40,8 @@ corpus = re.sub(r"\n+", " \n ", corpus)
 print("corpus constructed")
 # print(corpus)
 words_seq = corpus.split(' ')
-words_seq= words_seq[0:150000]
+print("length of words_seq: ", len(words_seq))
+words_seq = words_seq[:300000]
 vocab=list(set(words_seq))
 fp = open("vocab.p", "wb")
 pickle.dump(vocab, fp)
@@ -48,7 +51,7 @@ fp.close()
 print(len(vocab))
 word_ix={c:i for i,c in enumerate(vocab)}
 ix_word={i:c for i,c in enumerate(vocab)}
-
+# print(ix_word)
 maxlen=5
 batch_size = 128
 vocab_size=len(vocab)
@@ -92,7 +95,7 @@ model.add(LSTM(128))
 model.add(Dense(vocab_size))
 model.add(Activation('softmax'))
 model.summary()
-model.compile(optimizer=Adam(lr=0.01),loss='categorical_crossentropy',metrics=['accuracy'])
+model.compile(optimizer=Adam(lr=0.01),loss='categorical_crossentropy',metrics=['accuracy','top_k_categorical_accuracy'])
 
 model.fit_generator(generator(batch_size), samples_per_epoch=len(sentences)/batch_size, nb_epoch=10)
 
@@ -105,21 +108,3 @@ with open("model.json", "w") as json_file:
 # serialize weights to HDF5
 model.save_weights("model.h5")
 print("Saved model to disk")
-
-# import random
-# generated=''
-# start_index=random.randint(0,len(words_seq)-maxlen-1)
-# sent=words_seq[start_index:start_index+maxlen]
-# generated+=sent
-# for i in range(100):
-#     x_sample=generated[i:i+maxlen]
-#     x=np.zeros((1,maxlen,vocab_size))
-#     for j in range(maxlen):
-#         x[0,j,word_ix[x_sample[j]]]=1
-#     probs=model.predict(x)
-#     probs=np.reshape(probs,probs.shape[1])
-#     ix=np.random.choice(range(vocab_size),p=probs.ravel())
-#     generated+=ix_word[ix]
-#
-# print(generated)
-
