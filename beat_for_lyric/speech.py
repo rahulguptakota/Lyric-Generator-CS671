@@ -3,9 +3,10 @@ import subprocess
 import threading
 from time import sleep
 from threading import Thread
+from pygame import mixer # Load the required library
 
 # VARIABLES
-beat_to_play = "beat.mp3"
+beat_to_play = "/home/harsha/Desktop/8th_sem/cs671/Lyric-Generator-CS671/beat_for_lyric/beat.mp3"
 slowdown_rate = 35 # higher value means slower speech... keep it between ~50 and 0 depending on how fast the beat is.
 intro = 24 #amount in seconds it takes from the start of the beat to when the rapping should begin... how many seconds the AI waits to start rapping.
 
@@ -44,7 +45,12 @@ def sing():
     engine.runAndWait()
 
 def beat():
-    play_mp3(beat_to_play)
+    # play_mp3(beat_to_play)
+    mixer.init()
+    mixer.music.load('/home/harsha/Desktop/8th_sem/cs671/Lyric-Generator-CS671/beat_for_lyric/beat.mp3')
+    mixer.music.play()
+
+
 
 
 Thread(target=beat).start()

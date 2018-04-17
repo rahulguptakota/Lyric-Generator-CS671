@@ -6,7 +6,7 @@ import re
 
 import keras
 import numpy as np
-from keras.layers import LSTM, Activation, Dense, Embedding
+from keras.layers import LSTM, Activation, Dense, Embedding, Dropout
 from keras.models import Sequential
 from keras.optimizers import Adam
 from nltk import word_tokenize
@@ -26,7 +26,7 @@ data=np.array(df)
 print("Length of data: ", len(data))
 
 corpus=''
-for ix in range(15):
+for ix in range(15000):
     corpus+=" "
     corpus+=data[ix]
     # print(ix)
@@ -119,7 +119,7 @@ def generator(batch_size):
                 index = random.choice(range(len(sentences)))
                 batch_labels[ix] = glove_model[next_word[index]]
                 for iy in range(maxlen):
-                    print(iy)
+                    # print(iy)
                     batch_features[ix][iy*50:(iy+1)*50] = list(glove_model[sentences[index][iy]])
                 # batch_labels[ix,word_ix[next_word[index]]] = 1
                 # for iy in range(maxlen):
@@ -129,36 +129,51 @@ def generator(batch_size):
         yield batch_features, batch_labels
 
 max_features = maxlen*50
-model=Sequential()
-model.add(Embedding(max_features, input_length=maxlen*50 ,output_dim=256))
-model.add(LSTM(128))
-model.add(Dense(50))
-model.add(Activation('softmax'))
-model.summary()
+# model=Sequential()
+# model.add(Embedding(max_features, input_length=maxlen*50 ,output_dim=256))
+# model.add(LSTM(128))
+# model.add(Dense(50))
+# model.add(Activation('softmax'))
+# model.summary()
 
 
 
-# def custom_pred(y_true, y_pred):
-#     # dot_prod = 0
-#     # for i in range(y_true.size()):
-#     #     dot_prod += y_true[i]*y_pred[i]
-#     import keras.backend as K
-#     C = K.sum(y_true * y_pred,axis=-1,keepdims=True)
-#     # val = K.cast_to_floatx(C)
-#     val = K.eval(C)
-#     # print(int(C))
-#     # print(C.size())
-#     # print(C.shape())
-#     print(val)
-#     if val > 0.4:
-#         return 1
-#     else:
-#         return 0
+# # def custom_pred(y_true, y_pred):
+# #     # dot_prod = 0
+# #     # for i in range(y_true.size()):
+# #     #     dot_prod += y_true[i]*y_pred[i]
+# #     import keras.backend as K
+# #     C = K.sum(y_true * y_pred,axis=-1,keepdims=True)
+# #     # val = K.cast_to_floatx(C)
+# #     val = K.eval(C)
+# #     # print(int(C))
+# #     # print(C.size())
+# #     # print(C.shape())
+# #     print(val)
+# #     if val > 0.4:
+# #         return 1
+# #     else:
+# #         return 0
 
 
-model.compile(optimizer=Adam(lr=0.1),loss='categorical_crossentropy',metrics=['accuracy'])
+# model.compile(optimizer=Adam(lr=0.1),loss='categorical_crossentropy',metrics=['accuracy'])
 
+# model.fit_generator(generator(batch_size), samples_per_epoch=len(sentences)/batch_size, nb_epoch=10)
+
+model = Sequential()
+model.add(Dense(100, activation="relu", kernel_initializer="uniform", input_dim=maxlen*50))
+model.add(Dense(50, activation="relu", kernel_initializer="uniform"))
+model.add(Dropout(0.5))
+model.add(Dense(50, activation='softmax'))
+
+# sgd = SGD(lr=0.01)
+# model.compile(loss="binary_crossentropy", optimizer=sgd, metrics=["accuracy"])
+model.compile(optimizer=Adam(lr=0.1),loss='mean_squared_error',metrics=['accuracy'])
+
+# model.fit(np.array(X_train), np.array(y_train), epochs=50, batch_size=128)
 model.fit_generator(generator(batch_size), samples_per_epoch=len(sentences)/batch_size, nb_epoch=10)
+
+
 
 # for i in range(1000):
 #     model.fit(X,y,epochs=5,batch_size=128)
