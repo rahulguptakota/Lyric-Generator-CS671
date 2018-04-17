@@ -11,6 +11,7 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 from nltk import word_tokenize
 from scipy.sparse import csr_matrix
+from keras.layers import Dropout
 
 df = []
 with open('songdata.csv', 'r') as csvfile:
@@ -65,7 +66,7 @@ print(len(vocab))
 word_ix={c:i for i,c in enumerate(vocab)}
 ix_word={i:c for i,c in enumerate(vocab)}
 # print(ix_word)
-maxlen=5
+maxlen=10
 batch_size = 128
 vocab_size=len(vocab)
 
@@ -99,18 +100,22 @@ def generator(batch_size):
             batch_labels[ix,word_ix[next_word[index]]] = 1
             for iy in range(maxlen):
                 batch_features[ix,iy]=word_ix[sentences[index][iy]]
-        yield batch_features, batch_labels
+        yield (batch_features/vocab_size, batch_labels)
 
 max_features = vocab_size
 model=Sequential()
 model.add(Embedding(max_features, input_length=maxlen ,output_dim=256))
+model.add(Dense(256))
+model.add(Activation('relu'))
+model.add(Dropout(0.5))
 model.add(LSTM(128))
+model.add(Dropout(0.2))
 model.add(Dense(vocab_size))
 model.add(Activation('softmax'))
 model.summary()
 model.compile(optimizer=Adam(lr=0.01),loss='categorical_crossentropy',metrics=['accuracy','top_k_categorical_accuracy'])
 
-model.fit_generator(generator(batch_size), samples_per_epoch=len(sentences)/batch_size, nb_epoch=10)
+model.fit_generator(generator(batch_size), samples_per_epoch=len(sentences)/batch_size, nb_epoch=5)
 
 # for i in range(1000):
 #     model.fit(X,y,epochs=5,batch_size=128)
