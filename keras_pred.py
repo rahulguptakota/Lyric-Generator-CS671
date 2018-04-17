@@ -23,37 +23,38 @@ loaded_model.load_weights("model.h5")
 loaded_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy','top_k_categorical_accuracy'])
 
 ####### loading/storing corpus
-corpus=''
-# for ix in range(len(data)):
-#     corpus+=data[ix]
 # fp = open("corpus.p", "wb")
 # pickle.dump(corpus, fp)
 fp = open("corpus.p", "rb")
 corpus = pickle.load(fp)
 fp.close()
-
 # corpus=corpus[]
-corpus = re.sub(r"\n+", " \n ", corpus)
+corpus = re.sub(r"\([^\n]*\)", " ", corpus)
+corpus = re.sub(r"\([^\n]*\)", " ", corpus)
+corpus = re.sub(r"\n+", " ttttttttttt ", corpus)
 
 print("corpus constructed")
 # print(corpus)
-words_seq = corpus.split(' ')
-words_seq = words_seq[:150000]
+# exit()
+words_seq = word_tokenize(corpus)
+for i in range(len(words_seq)):
+    if words_seq[i]=="ttttttttttt":
+        words_seq[i] = "\n"
 
-####### loading/storing vocab
+print("length of words_seq: ", len(words_seq))
+words_seq = words_seq[:200000]
+print(words_seq)
+
 # vocab=list(set(words_seq))
 # fp = open("vocab.p", "wb")
 # pickle.dump(vocab, fp)
 fp = open("vocab.p", "rb")
 vocab = pickle.load(fp)
 fp.close()
-
 print(len(vocab))
 word_ix={c:i for i,c in enumerate(vocab)}
 ix_word={i:c for i,c in enumerate(vocab)}
 # print(ix_word)
-
-
 maxlen=5
 batch_size = 128
 vocab_size=len(vocab)
@@ -64,11 +65,12 @@ for i in range(len(words_seq)-maxlen-1):
     sentences.append(words_seq[i:i+maxlen])
     next_word.append(words_seq[i+maxlen])
 
+print(len(sentences),maxlen,vocab_size)
 
 
 generated=[]
 # start_index=random.randint(0,len(words_seq)-maxlen-1)
-start_index=0
+start_index=1
 sent=words_seq[start_index:start_index+maxlen]
 generated+=sent
 for i in range(100):
