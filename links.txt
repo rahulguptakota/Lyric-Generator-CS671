@@ -5,3 +5,6 @@ https://www.kaggle.com/gyani95/380000-lyrics-from-metrolyrics
 https://github.com/walkerkq/musiclyrics
 
 
+https://data.mendeley.com/datasets/n9vbc8g9cx/1
+https://www.kaggle.com/ultrajack/modern-renaissance-poetry
+
